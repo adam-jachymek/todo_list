@@ -7,6 +7,7 @@ import { useFormik } from "formik";
 import * as Yup from 'yup';
 
 import './tasks.sass'
+import classNames from "classnames";
 
 const Tasks = () => {
 const { isLoading, data, refetch } = useQuery(["fetchTasks"], fetchTasks)
@@ -19,13 +20,13 @@ const { mutate: addItem } = useMutation(addTask, {
 
 const TaskSchema = Yup.object().shape({
   name: Yup.string()
-    .min(5, 'Too Short!')
-    .max(50, 'Too Long!')
-    .required('Required'),
+    .min(5, 'too short! (min 5 characters)')
+    .max(50, 'too long! (max 50 characters)')
+    .required('required'),
   description: Yup.string()
-    .min(5, 'Too Short!')
-    .max(50, 'Too Long!')
-    .required('Required'),
+    .min(5, 'too short! (min 5 characters)')
+    .max(50, 'too long! (max 50 characters)')
+    .required('required'),
 });
 
 const formik = useFormik({
@@ -76,6 +77,7 @@ const tasks = data?.map((task) => (
   </li>
 ))
 
+console.log(formik.touched, formik.errors, formik.values)
   return (
     <>
     <Header />
@@ -83,14 +85,34 @@ const tasks = data?.map((task) => (
       <form onSubmit={formik.handleSubmit}>
         <h3 className="wrapper__title">Tasks</h3>
         <InputWrapper className="form">
-          {formik.errors.name && formik.touched.name ? (
-              <div>{formik.errors.name}</div>
-            ) : null}
-          <TextInput className="form__input" label="Name" value={formik.values.name} onChange={formik.handleChange} name="name" />
-          {formik.errors.description && formik.touched.description ? (
-              <div>{formik.errors.description}</div>
-            ) : null}
-          <TextInput className="form__input" label="Description" value={formik.values.description} onChange={formik.handleChange} name="description"/>
+          <TextInput
+            classNames={{
+              root: "form__input",
+              input: classNames({"form__error": formik.errors.name && formik.touched.name}),
+              label: classNames({"form__label-error": formik.errors.name && formik.touched.name})
+            }}
+            label={formik.errors.name && formik.touched.name ? (
+              "Name " + formik.errors.name
+            ) : "Name"}
+            value={formik.values.name}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            name="name"
+          />
+          <TextInput
+            classNames={{
+              root: "form__input",
+              input: classNames({"form__error": formik.errors.description && formik.touched.description}),
+              label: classNames({"form__label-error": formik.errors.description && formik.touched.description})
+            }}
+            label={formik.errors.description && formik.touched.description ? (
+              "Description " + formik.errors.description
+            ) : "Description"}
+            value={formik.values.description}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            name="description"
+          />
         <Button className="form__submit" type="submit">Add</Button>
         </InputWrapper>
       </form>
